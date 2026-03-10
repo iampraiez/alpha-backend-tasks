@@ -19,6 +19,22 @@ class ReportFormatter:
         template = self._env.get_template("base.html")
         return template.render(title=title, body=body, generated_at=self.generated_timestamp())
 
+    def format_briefing(self, briefing) -> "BriefingReportView":
+        from app.schemas.briefing import BriefingReportView
+
+        return BriefingReportView(
+            id=briefing.id,
+            title=f"Briefing: {briefing.company_name} ({briefing.ticker})",
+            sector=briefing.sector,
+            analyst_name=briefing.analyst_name,
+            summary=briefing.summary,
+            recommendation=briefing.recommendation.capitalize(),
+            formatted_timestamp=briefing.generated_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
+            key_points=[p.point_text for p in sorted(briefing.points, key=lambda x: x.id)],
+            risks=[r.risk_text for r in sorted(briefing.risks, key=lambda x: x.id)],
+            metrics={m.name: m.value for m in sorted(briefing.metrics, key=lambda x: x.name)}
+        )
+
     @staticmethod
     def generated_timestamp() -> str:
         return datetime.now(timezone.utc).isoformat()

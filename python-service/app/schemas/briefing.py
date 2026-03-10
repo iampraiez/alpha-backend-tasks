@@ -40,3 +40,16 @@ class BriefingCreatedResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+
+
+class BriefingReportView(BaseModel):
+    id: int
+    title: str
+    sector: str
+    analyst_name: str
+    summary: str
+    recommendation: str
+    formatted_timestamp: str
+    key_points: list[str]
+    risks: list[str]
+    metrics: dict[str, str]

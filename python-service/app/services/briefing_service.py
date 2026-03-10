@@ -31,3 +31,7 @@ def create_briefing(db: Session, payload: CreateBriefingDto) -> Briefing:
     db.commit()
     db.refresh(briefing)
     return briefing
+
+
+def get_briefing(db: Session, briefing_id: int) -> Briefing | None:
+    return db.query(Briefing).filter(Briefing.id == briefing_id).first()
