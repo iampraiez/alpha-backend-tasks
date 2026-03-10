@@ -82,6 +82,10 @@ source .venv/bin/activate
 python -m pytest
 ```
 
+## Edge HTML Storage Note
+
+The `/briefings/{id}/generate` endpoint renders the Jinja2 context for the briefing into an HTML string payload using the database representation. That HTML is stored directly on the `briefings` row under `html_content` allowing near-instant delivery on `/briefings/{id}/html` requests simulating Edge computing patterns with edge-cached strings, instead of dynamically computing the template on every GET request.
+
 ## Project Layout
 
 - `app/main.py`: FastAPI bootstrap and router wiring

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Briefing Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #f9fafb;
+    }
+    .report-container {
+      background-color: #ffffff;
+      padding: 2.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    h1 {
+      color: #111827;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-top: 0;
+    }
+    h2 {
+      color: #1f2937;
+      margin-top: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.25rem;
+    }
+    .meta-info {
+      display: flex;
+      gap: 2rem;
+      background-color: #f3f4f6;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      margin: 1.5rem 0;
+    }
+    .meta-item strong {
+      display: block;
+      font-size: 0.875rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .meta-item span {
+      font-size: 1.125rem;
+      color: #111827;
+      font-weight: 500;
+    }
+    ul {
+      padding-left: 1.5rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    .recommendation {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: #4b5563;
+    }
+    footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <header>
+      <h1>Briefing: {{ view.company_name }} ({{ view.ticker }})</h1>
+    </header>
+    
+    <div class="meta-info">
+      <div class="meta-item">
+        <strong>Sector</strong>
+        <span>{{ view.sector }}</span>
+      </div>
+      <div class="meta-item">
+        <strong>Analyst</strong>
+        <span>{{ view.analyst_name }}</span>
+      </div>
+    </div>
+
+    <section>
+      <h2>Executive Summary</h2>
+      <p>{{ view.summary | safe }}</p>
+    </section>
+
+    <section>
+      <h2>Key Points</h2>
+      <ul>
+        {% for point in view.key_points %}
+        <li>{{ point | safe }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Risks</h2>
+      <ul>
+        {% for risk in view.risks %}
+        <li>{{ risk | safe }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Recommendation</h2>
+      <div class="recommendation">
+        {{ view.recommendation | safe }}
+      </div>
+    </section>
+
+    {% if view.metrics %}
+    <section>
+      <h2>Metrics</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for name, value in view.metrics.items() %}
+          <tr>
+            <td>{{ name }}</td>
+            <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    <footer>
+      Generated at {{ view.generated_at }}
+    </footer>
+  </div>
+</body>
+</html>

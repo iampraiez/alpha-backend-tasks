@@ -35,3 +35,16 @@ def create_briefing(db: Session, payload: CreateBriefingDto) -> Briefing:
 
 def get_briefing(db: Session, briefing_id: int) -> Briefing | None:
     return db.query(Briefing).filter(Briefing.id == briefing_id).first()
+
+
+def generate_and_store_html(db: Session, briefing: Briefing) -> None:
+    from app.services.report_formatter import ReportFormatter
+
+    formatter = ReportFormatter()
+    view = formatter.format_briefing(briefing)
+    
+    html_content = formatter.render_briefing_html(view)
+    briefing.html_content = html_content
+    briefing.generated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(briefing)

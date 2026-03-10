@@ -45,11 +45,14 @@ class BriefingCreatedResponse(BaseModel):
 class BriefingReportView(BaseModel):
     id: int
     title: str
+    company_name: str
+    ticker: str
     sector: str
     analyst_name: str
     summary: str
     recommendation: str
     formatted_timestamp: str
+    generated_at: str
     key_points: list[str]
     risks: list[str]
     metrics: dict[str, str]
