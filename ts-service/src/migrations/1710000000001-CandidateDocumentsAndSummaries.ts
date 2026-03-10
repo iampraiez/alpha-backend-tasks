@@ -19,9 +19,15 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
             isNullable: false,
           },
           {
-            name: 'candidate_name',
+            name: 'candidate_id',
             type: 'varchar',
-            length: '160',
+            length: '64',
+            isNullable: false,
+          },
+          {
+            name: 'document_type',
+            type: 'varchar',
+            length: '120',
             isNullable: false,
           },
           {
@@ -31,19 +37,9 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
             isNullable: false,
           },
           {
-            name: 'mime_type',
+            name: 'storage_key',
             type: 'varchar',
-            length: '100',
-            isNullable: false,
-          },
-          {
-            name: 'file_size_bytes',
-            type: 'integer',
-            isNullable: false,
-          },
-          {
-            name: 'content',
-            type: 'text',
+            length: '512',
             isNullable: false,
           },
           {
@@ -107,6 +103,25 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
     );
 
     await queryRunner.createForeignKey(
+      'candidate_documents',
+      new TableForeignKey({
+        name: 'fk_candidate_documents_candidate_id',
+        columnNames: ['candidate_id'],
+        referencedTableName: 'sample_candidates',
+        referencedColumnNames: ['id'],
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createIndex(
+      'candidate_documents',
+      new TableIndex({
+        name: 'idx_candidate_documents_candidate_id',
+        columnNames: ['candidate_id'],
+      }),
+    );
+
+    await queryRunner.createForeignKey(
       'candidate_summaries',
       new TableForeignKey({
         name: 'fk_candidate_summaries_document_id',
@@ -156,7 +171,9 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
     await queryRunner.dropIndex('candidate_summaries', 'idx_candidate_summaries_workspace_id');
     await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_status');
     await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_workspace_id');
+    await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_candidate_id');
     await queryRunner.dropForeignKey('candidate_summaries', 'fk_candidate_summaries_document_id');
+    await queryRunner.dropForeignKey('candidate_documents', 'fk_candidate_documents_candidate_id');
     await queryRunner.dropTable('candidate_summaries');
     await queryRunner.dropTable('candidate_documents');
   }
