@@ -37,7 +37,7 @@ cp .env.example .env
 - `PORT`
 - `DATABASE_URL`
 - `NODE_ENV`
-- `GEMINI_API_KEY` (leave blank unless implementing a real provider)
+- `GEMINI_API_KEY` (Required for live summarization. Get a free API key at [Google AI Studio](https://aistudio.google.com/app/apikey). If not provided or in `NODE_ENV=test`, the fake provider is used.)
 
 Do not commit API keys or secrets.
 

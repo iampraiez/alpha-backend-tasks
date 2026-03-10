@@ -130,6 +130,43 @@ export class SampleService {
     return summary;
   }
 
+  async listCandidateSummaries(user: AuthUser, candidateId: string): Promise<CandidateSummary[]> {
+    await this.ensureWorkspace(user.workspaceId);
+
+    const candidate = await this.candidateRepository.findOne({
+      where: { id: candidateId, workspaceId: user.workspaceId },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException('Candidate not found');
+    }
+
+    return this.summaryRepository.find({
+      where: { workspaceId: user.workspaceId, document: { candidateId } },
+      relations: ['document'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getCandidateSummary(
+    user: AuthUser,
+    candidateId: string,
+    summaryId: string,
+  ): Promise<CandidateSummary> {
+    await this.ensureWorkspace(user.workspaceId);
+
+    const summary = await this.summaryRepository.findOne({
+      where: { id: summaryId, workspaceId: user.workspaceId, document: { candidateId } },
+      relations: ['document'],
+    });
+
+    if (!summary) {
+      throw new NotFoundException('Summary not found');
+    }
+
+    return summary;
+  }
+
   private async ensureWorkspace(workspaceId: string): Promise<void> {
     const existing = await this.workspaceRepository.findOne({ where: { id: workspaceId } });
 

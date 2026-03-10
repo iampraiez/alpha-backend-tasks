@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
+import { CandidateDocument } from '../entities/candidate-document.entity';
+import { CandidateSummary } from '../entities/candidate-summary.entity';
 import { SampleCandidate } from '../entities/sample-candidate.entity';
 import { SampleWorkspace } from '../entities/sample-workspace.entity';
+import { QueueService } from '../queue/queue.service';
 import { SampleService } from './sample.service';
 
 describe('SampleService', () => {
@@ -18,6 +21,25 @@ describe('SampleService', () => {
     create: jest.fn(),
     save: jest.fn(),
     find: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const documentRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+
+  const summaryRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const queueService = {
+    enqueue: jest.fn(),
+    getQueuedJobs: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,6 +55,18 @@ describe('SampleService', () => {
         {
           provide: getRepositoryToken(SampleCandidate),
           useValue: candidateRepository,
+        },
+        {
+          provide: getRepositoryToken(CandidateDocument),
+          useValue: documentRepository,
+        },
+        {
+          provide: getRepositoryToken(CandidateSummary),
+          useValue: summaryRepository,
+        },
+        {
+          provide: QueueService,
+          useValue: queueService,
         },
       ],
     }).compile();
@@ -58,3 +92,4 @@ describe('SampleService', () => {
     expect(result.workspaceId).toBe('workspace-1');
   });
 });
+

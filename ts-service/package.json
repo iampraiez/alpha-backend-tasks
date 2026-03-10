@@ -15,6 +15,7 @@
     "migration:show": "typeorm-ts-node-commonjs migration:show -d src/config/typeorm.config.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^10.4.15",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.16",

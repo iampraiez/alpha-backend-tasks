@@ -99,6 +99,13 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
             isNullable: false,
           },
         ],
+        checks: [
+          {
+            name: 'chk_candidate_summaries_llm_model',
+            columnNames: ['llm_model'],
+            expression: `"llm_model" IN ('gemini-2.5-flash')`,
+          },
+        ],
       }),
     );
 
@@ -167,14 +174,7 @@ export class CandidateDocumentsAndSummaries1710000000001 implements MigrationInt
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('candidate_summaries', 'idx_candidate_summaries_document_id');
-    await queryRunner.dropIndex('candidate_summaries', 'idx_candidate_summaries_workspace_id');
-    await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_status');
-    await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_workspace_id');
-    await queryRunner.dropIndex('candidate_documents', 'idx_candidate_documents_candidate_id');
-    await queryRunner.dropForeignKey('candidate_summaries', 'fk_candidate_summaries_document_id');
-    await queryRunner.dropForeignKey('candidate_documents', 'fk_candidate_documents_candidate_id');
-    await queryRunner.dropTable('candidate_summaries');
-    await queryRunner.dropTable('candidate_documents');
+    await queryRunner.query(`DROP TABLE IF EXISTS "candidate_summaries" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "candidate_documents" CASCADE`);
   }
 }

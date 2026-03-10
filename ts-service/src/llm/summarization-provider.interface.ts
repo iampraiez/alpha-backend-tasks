@@ -1,5 +1,9 @@
 export type RecommendedDecision = 'advance' | 'hold' | 'reject';
 
+export enum SupportedLlmModel {
+  GEMINI_2_5_FLASH = 'gemini-2.5-flash',
+}
+
 export interface CandidateSummaryResult {
   score: number;
   strengths: string[];
@@ -11,6 +15,7 @@ export interface CandidateSummaryResult {
 export interface CandidateSummaryInput {
   candidateId: string;
   documents: string[];
+  model: SupportedLlmModel;
 }
 
 export interface SummarizationProvider {
