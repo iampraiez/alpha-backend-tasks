@@ -8,10 +8,13 @@ import { Repository } from 'typeorm';
 
 import { AuthUser } from '../auth/auth.types';
 import { CandidateDocument } from '../entities/candidate-document.entity';
+import { CandidateSummary } from '../entities/candidate-summary.entity';
 import { SampleCandidate } from '../entities/sample-candidate.entity';
 import { SampleWorkspace } from '../entities/sample-workspace.entity';
+import { QueueService } from '../queue/queue.service';
 import { CreateCandidateDocumentDto } from './dto/create-candidate-document.dto';
 import { CreateSampleCandidateDto } from './dto/create-sample-candidate.dto';
+import { GenerateCandidateSummaryDto } from './dto/generate-candidate-summary.dto';
 
 @Injectable()
 export class SampleService {
@@ -22,6 +25,9 @@ export class SampleService {
     private readonly candidateRepository: Repository<SampleCandidate>,
     @InjectRepository(CandidateDocument)
     private readonly documentRepository: Repository<CandidateDocument>,
+    @InjectRepository(CandidateSummary)
+    private readonly summaryRepository: Repository<CandidateSummary>,
+    private readonly queueService: QueueService,
   ) {}
 
   async createCandidate(user: AuthUser, dto: CreateSampleCandidateDto): Promise<SampleCandidate> {
@@ -78,6 +84,50 @@ export class SampleService {
     });
 
     return this.documentRepository.save(document);
+  }
+
+  async generateCandidateSummary(
+    user: AuthUser,
+    candidateId: string,
+    dto: GenerateCandidateSummaryDto,
+  ): Promise<CandidateSummary> {
+    await this.ensureWorkspace(user.workspaceId);
+
+    const document = await this.documentRepository.findOne({
+      where: {
+        id: dto.documentId,
+        candidateId,
+        workspaceId: user.workspaceId,
+      },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Candidate document not found');
+    }
+
+    const summaryId = randomUUID();
+
+    const summary = this.summaryRepository.create({
+      id: summaryId,
+      documentId: document.id,
+      workspaceId: user.workspaceId,
+      summary: '', 
+      llmModel: dto.llmModel,
+    });
+
+    await this.summaryRepository.save(summary);
+
+    this.queueService.enqueue('generate-summary', {
+      summaryId: summary.id,
+      documentId: document.id,
+      workspaceId: user.workspaceId,
+      llmModel: dto.llmModel,
+    });
+
+    document.status = 'processing';
+    await this.documentRepository.save(document);
+
+    return summary;
   }
 
   private async ensureWorkspace(workspaceId: string): Promise<void> {

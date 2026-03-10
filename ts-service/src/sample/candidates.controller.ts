@@ -1,10 +1,11 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 
 import { CurrentUser } from '../auth/auth-user.decorator';
 import { AuthUser } from '../auth/auth.types';
 import { FakeAuthGuard } from '../auth/fake-auth.guard';
 import { WorkspaceAccessGuard } from '../auth/workspace-access.guard';
 import { CreateCandidateDocumentDto } from './dto/create-candidate-document.dto';
+import { GenerateCandidateSummaryDto } from './dto/generate-candidate-summary.dto';
 import { SampleService } from './sample.service';
 
 @Controller('candidates')
@@ -22,5 +23,15 @@ export class CandidatesController {
       dto.candidateId = candidateId;
     }
     return this.sampleService.createCandidateDocument(user, dto);
+  }
+
+  @Post(':candidateId/summaries/generate')
+  @HttpCode(HttpStatus.ACCEPTED)
+  async generateSummary(
+    @CurrentUser() user: AuthUser,
+    @Param('candidateId') candidateId: string,
+    @Body() dto: GenerateCandidateSummaryDto,
+  ) {
+    return this.sampleService.generateCandidateSummary(user, candidateId, dto);
   }
 }
