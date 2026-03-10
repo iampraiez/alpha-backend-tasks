@@ -48,14 +48,12 @@ export class SampleService {
     user: AuthUser,
     dto: CreateCandidateDocumentDto,
   ): Promise<CandidateDocument> {
-    console.log('User', user, dto)
     await this.ensureWorkspace(user.workspaceId);
 
     const candidate = await this.candidateRepository.findOne({
       where: { id: dto.candidateId, workspaceId: user.workspaceId },
     });
 
-    console.log('Candidate', candidate)
     if (!candidate) {
       throw new NotFoundException('Candidate not found');
     }
