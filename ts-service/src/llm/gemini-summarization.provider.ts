@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai';
 
 import {
   CandidateSummaryInput,
@@ -20,10 +20,27 @@ export class GeminiSummarizationProvider implements SummarizationProvider {
   async generateCandidateSummary(
     input: CandidateSummaryInput,
   ): Promise<CandidateSummaryResult> {
+    const summarySchema: Schema = {
+      type: SchemaType.OBJECT,
+      properties: {
+        score: { type: SchemaType.NUMBER },
+        strengths: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        concerns: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        summary: { type: SchemaType.STRING },
+        recommendedDecision: {
+          type: SchemaType.STRING,
+          format: 'enum',
+          enum: ['advance', 'hold', 'reject'],
+        },
+      },
+      required: ['score', 'strengths', 'concerns', 'summary', 'recommendedDecision'],
+    };
+
     const model = this.ai.getGenerativeModel({
       model: input.model,
       generationConfig: {
         responseMimeType: 'application/json',
+        responseSchema: summarySchema,
       },
     });
 
@@ -33,20 +50,26 @@ export class GeminiSummarizationProvider implements SummarizationProvider {
 
       Documents Content:
       ${input.documents.join('\n\n')}
-
-      Return ONLY a JSON matching this exact structure, nothing else:
-      {
-        "score": (number between 0 and 100),
-        "strengths": ["list", "of", "strings"],
-        "concerns": ["list", "of", "strings"],
-        "summary": "a brief text summary",
-        "recommendedDecision": "advance" | "hold" | "reject"
-      }
     `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    try {
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      const parsed = JSON.parse(text);
 
-    return JSON.parse(text) as CandidateSummaryResult;
+      if (
+        typeof parsed?.score !== 'number' ||
+        !Array.isArray(parsed?.strengths) ||
+        !Array.isArray(parsed?.concerns) ||
+        typeof parsed?.summary !== 'string' ||
+        !['advance', 'hold', 'reject'].includes(parsed?.recommendedDecision)
+      ) {
+        throw new Error('LLM output does not match the required CandidateSummaryResult schema.');
+      }
+
+      return parsed as CandidateSummaryResult;
+    } catch (error) {
+      throw new Error(`LLM generation or validation failed: ${(error as Error).message}`);
+    }
   }
 }

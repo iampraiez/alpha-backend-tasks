@@ -8,7 +8,7 @@
 - **Workspace Access Policy**: `WorkspaceAccessGuard` extracts the path param `candidateId`, fetches the candidate, and guards against cross-workspace accesses natively via the NestJS guard pipeline.
 
 ## Future improvements
-- **Real message queue**: Replace `QueueService` with Redis + BullMQ.
+- **Real message queue & Event-Driven Worker**: Replace the simplistic `QueueService` + `setInterval` combination with a production-ready queue like RabbitMQ, Redis + BullMQ, or AWS SQS. Instead of a CPU-intensive, poorly-scaling polling loop, transition to an event-driven consumer architectural pattern that allows multiple worker pods to securely pull messages without race conditions, utilizing distributed locking or inherent queue acknowledgement features to handle concurrency elegantly.
 - **Durable Storage**: Move `.storage` to cloudinary Cloud Storage.
 - **Rate limiting / Retries / DLQ**: The worker currently catches errors and marks status `failed`, but lacks a Dead Letter Queue or retry exponential backoff for flaky LLM API calls.
-- **Validation**: Improve the prompt structure and implement a validator library like `zod` to strictly parse the Gemini JSON response instead of a raw `JSON.parse`.
+- **Advanced Validation**: While basic validation is implemented, hooking in a schema validator stringently parsing the Gemini structured JSON response via `zod` would ensure complete runtime type-safety.
